@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>reveal.js</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/white.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>Microba Discussions</section>
+				<section data-markdown>
+					### Programming Experiences
+					- Python
+					- Go
+					- R
+					- JavaScript
+				</section>
+				<section data-markdown>
+					### Bioinfomatics Experiences
+					- Proteomics data pipeline development
+					- In-silico analysis pipeline for glycosylation evolution
+					- 5' UTR open reading frame database uPEPeroni development
+				</section>
+				<section data-markdown>
+					### Recent projects
+					- Curtain and CurtainPTM, data analysis sharing tools
+					- Copica, protein copy number database
+					- Metabolomics data analysis pipeline
+					- Adept, data analysis sharing tools and pipeline
+				</section>
+				<section data-markdown>
+					### Curtain and CurtainPTM
+					- Shared Python backend
+					- Separated frontend written using JavaScript
+					- Each saved datasets are given a unique ids which could be used to access the data as well as the associated settings
+
+					```python
+					hash = ""
+					req = json_decode(self.request.body.decode("utf-8"))
+					if "password" in req:
+						if req["password"]:
+							hash = bcrypt.hashpw(req["password"].encode("utf-8"), bcrypt.gensalt())
+					uni = str(uuid4())
+					with open(f"files/{uni}.json", "wb") as data:
+						data.write(self.request.body)
+					f = File(password=hash, filename=uni)
+
+					```
+				</section>
+				<section data-markdown>
+					### CurtainPTM Example
+					![CurtainPTM Example](/dist/curtainPTM.png)
+				</section>
+				<section data-markdown>
+					### Copica
+					- A copy number database with a focus on cell line used in Parkinson's research
+					- Included a JavaScript implementation of a protein copy number algorithm
+
+					```typescript
+					this.ruler = new ProteomicRuler(this.histoneDB, e.df, e.IntensityCols, e.IdentifierCol, e.MolecularMassCol, e.Ploidy)
+					const data: any[] = []
+					const columns = this.ruler.intensityCols
+					for (const r of this.ruler.df) {
+						if (r[e.IdentifierCol] !== "") {
+							for (let i = 0; i < columns.length; i++) {
+								data.push({
+									"Gene names": r[e.GeneNameCol],
+									"Accession IDs": r[e.IdentifierCol].toUpperCase(),
+									"Copy number": r[columns[i]+"_copyNumber"],
+									"Rank": r[columns[i]+"_copyNumber_rank"],
+									"Cell type": "UserCellType"+i, "Experiment type": "Experiment"+i, "Fraction": i, "Condition": "Standard", "label": "UserCellType"+i+"Standard"
+								})
+							}
+						}
+					}
+					this.scatterData = new DataFrame(data)
+					this.userData.updateData(this.scatterData)
+
+					this.finishedProcessing.next(true)
+					```
+				</section>
+				<section data-markdown>
+					### Copica Example
+					![Copica Example](/dist/copica.png)
+				</section>
+				<section data-markdown>
+					### Metabolomics data analysis pipeline
+					- Working with collaborators with effect of Parkinson's on different cell lines metabolomics profile.
+					- Use ExtraTreeClassifier to identify important features.
+
+					```python
+
+					def get_important(data, experiments):
+						etc = ExtraTreesClassifier()
+						d = data.current_df[experiments].T
+						x = d.values
+						d.reset_index(inplace=True)
+						y = []
+						for i in d[d.columns[0]]:
+							y.append(i.split(".")[0])
+						etc.fit(x, y)
+						extra = pd.Series(etc.feature_importances_, index=d.columns[1:])
+						return extra
+					```
+				</section>
+				<section data-markdown>
+					### Adept
+					- Data statistical analysis tool
+					- Allow saving and sharing of your workflows
+					- Implementation of a special data structure that allow rewinding of the analysis
+					- Separate frontend and backend
+
+					```python
+
+					class Data:
+						def __init__(self, df=None, file_path=None, parent=None, operation=None, history=False, index=None):
+						def initiate_history(self):
+							self.history = [self]
+
+						def rewind(self, offset=1):
+
+						def forward(self, offset=1):
+
+						def statistical_analysis_methods(self):
+					```
+				</section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+		<script src="plugin/highlight/highlight.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
+			});
+		</script>
+	</body>
+</html>
